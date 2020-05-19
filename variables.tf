@@ -102,11 +102,6 @@ variable "prometheus_conf_dir" {
   default = "/etc/prometheus"
 }
 
-variable "promcol_version" {
-  description = "Prometheus Collector version"
-  default = "2.16.0"
-}
-
 variable "node_exporter_version" {
   description = "Node Exporter version"
   default = "0.18.1"

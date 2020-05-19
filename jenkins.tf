@@ -78,14 +78,13 @@ resource "aws_security_group" "jenkins-final" {
 
 
 data "template_file" "jenkins_master_sh" {
-  template = file("${path.module}/jenkins/templates/master.sh")
+  template = file("${path.module}/jenkins/jenkins_master.sh.tpl")
 }
 
 data "template_file" "consul_jenkins" {
-  template = file("${path.module}/consul/templates/consul.sh.tpl")
+  template = file("${path.module}/templates/consul-agent.sh.tpl")
 
   vars = {
-      consul_version = var.consul_version
       node_exporter_version = var.node_exporter_version
       prometheus_dir = var.prometheus_dir
       config = <<EOF
@@ -96,29 +95,23 @@ data "template_file" "consul_jenkins" {
   }
 }
 
-data "template_file" "consul_jenkins_tpl" {
-  template = file("${path.module}/jenkins/templates/jenkins_master.sh.tpl")
-}
-
-data "template_file" "jenkins_node_exporter" {
-  template = file("${path.module}/monitoring/templates/node_exporter.sh.tpl")
+data "template_file" "node_exporter_agent" {
+  template = file("${path.module}/templates/node_exporter.sh.tpl")
 }
 
 # Create the user-data for the jenkins master
 data "template_cloudinit_config" "consul_jenkins_settings" {
   part {
-    content = data.template_file.jenkins_master_sh.rendered
-  }
-  part {
     content = data.template_file.consul_jenkins.rendered
   }
   part {
-    content = data.template_file.consul_jenkins_tpl.rendered
+    content = data.template_file.node_exporter_agent.rendered
   }
   part {
-    content = data.template_file.jenkins_node_exporter.rendered
+    content = data.template_file.jenkins_master_sh.rendered
   }
 }
+
 
 
 
@@ -134,13 +127,13 @@ resource "aws_instance" "jenkins_master" {
     Name = "Jenkins_Master-1"
     Labels = "linux"
   }
-  vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}"]
+  vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}", "${aws_security_group.final_monitoring.id}"]
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
   subnet_id = module.vpc.public_subnets[1]
   connection {
     type = "ssh"
-    host = "${aws_instance.jenkins_master.public_ip}"
-    private_key = "${tls_private_key.servers_key.private_key_pem}"
+    host = aws_instance.jenkins_master.public_ip
+    private_key = tls_private_key.servers_key.private_key_pem
     user = "ubuntu"
   }
  
@@ -156,8 +149,14 @@ resource "aws_instance" "jenkins_master" {
 }
 
 
+
+
+################################################################################
+
+
+
 data "template_file" "consul_jenkins_slave" {
-  template = file("${path.module}/consul/templates/consul-agent-linux.sh.tpl")
+  template = file("${path.module}/templates/consul-agent-linux.sh.tpl")
 
   vars = {
     node_exporter_version = var.node_exporter_version
@@ -169,12 +168,8 @@ data "template_file" "consul_jenkins_slave" {
     }
   }
 
-data "template_file" "consul_jenkins_slave_tpl" {
-  template = file("${path.module}/jenkins/templates/jenkins_slave.sh.tpl")
-}
-
 data "template_file" "jenkins_slave_sh" {
-  template = file("${path.module}/jenkins/templates/jenkins_slave.sh")
+  template = file("${path.module}/templates/jenkins_slave.sh.tpl")
 }
 
 #Create the user-data for the jenkins slave
@@ -182,18 +177,13 @@ data "template_cloudinit_config" "consul_jenkins_slave_settings" {
   count =  1
   
   part {
-    content = element(data.template_file.jenkins_slave_sh.*.rendered, count.index)
-  }
-  part {
     content = element(data.template_file.consul_jenkins_slave.*.rendered, count.index)
   }
   part {
-    content = element (data.template_file.consul_jenkins_slave_tpl.*.rendered, count.index)
-  }
-  part {
-    content = element (data.template_file.jenkins_node_exporter.*.rendered, count.index)
+    content = element(data.template_file.jenkins_slave_sh.*.rendered, count.index)
   }
 }
+
 resource "aws_instance" "jenkins_slave" {
 #########################################################
 # description = "create 3 EC2 machines for jenkins slave"
@@ -205,7 +195,7 @@ resource "aws_instance" "jenkins_slave" {
   associate_public_ip_address = true
   subnet_id = module.vpc.public_subnets[2]
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
-  vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}"]
+  vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}","${aws_security_group.final_monitoring.id}"]
   tags = {
     Name = "jenkins_slave-${count.index+1}"
     Labels = "linux"
@@ -213,8 +203,8 @@ resource "aws_instance" "jenkins_slave" {
   connection {
     type = "ssh"
     host = aws_instance.jenkins_slave[count.index].public_ip
-    private_key = "${tls_private_key.servers_key.private_key_pem}"
+    private_key = tls_private_key.servers_key.private_key_pem
     user = "ec2-user"
   }
-  user_data = data.template_cloudinit_config.consul_jenkins_slave_settings[count.index].rendered
+  user_data = element(data.template_cloudinit_config.consul_jenkins_slave_settings.*.rendered, count.index)
 }

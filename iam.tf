@@ -3,14 +3,14 @@
 # Create an IAM role for the auto-join
 resource "aws_iam_role" "consul-join" {
   name               = "final-consul-join"
-  assume_role_policy = file("${path.module}/consul/templates/policies/assume-role.json")
+  assume_role_policy = file("${path.module}/policies/assume-role-consul.json")
 }
 
 # Create the policy
 resource "aws_iam_policy" "consul-join" {
   name        = "final-consul-join"
   description = "Allows Consul nodes to describe instances for joining."
-  policy      = file("${path.module}/consul/templates/policies/describe-instances.json")
+  policy      = file("${path.module}/policies/describe-instances-consul.json")
 }
 
 # Attach the policy

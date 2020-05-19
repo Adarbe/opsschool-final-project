@@ -3,6 +3,7 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
   name = "final-project"
   cidr = "10.0.0.0/16"
+  enable_dns_hostnames = true
 
   azs                 = data.aws_availability_zones.available.names
   private_subnets     = var.vpc_private_subnets

@@ -42,13 +42,14 @@ tee /etc/consul.d/config.json > /dev/null <<EOF
   "enable_syslog": true,
   "enable_debug": true,
   "ui": true,
-  "client_addr": "0.0.0.0"
+  "client_addr": "0.0.0.0",
   "disable_remote_exec": true,
   "disable_update_check": true,
   "leave_on_terminate": true,
   "retry_join": ["provider=aws tag_key=consul_server tag_value=true"],
   ${config}
 }
+
 EOF
 
 # Create user & grant ownership of folders
@@ -85,3 +86,14 @@ systemctl enable consul.service
 systemctl start consul.service
 
 
+# Create consul node_exporter configuration
+tee /opt/prometheus/prometheus.yml > /dev/null <<EOF
+scrape_configs:
+  - job_name: 'node_exporter'
+    static_configs:
+    - targets: ['localhost:9100']
+EOF
+
+systemctl daemon-reload
+systemctl enable promcol.service
+systemctl start promcol.service

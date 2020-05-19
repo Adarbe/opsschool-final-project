@@ -25,6 +25,13 @@ resource "aws_security_group" "final_consul" {
     description = "Allow http from the world"
   }
   ingress {
+    from_port   = 9107
+    to_port     = 9107
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Consul exporter"
+  }
+  ingress {
     from_port   = 8500
     to_port     = 8500
     protocol    = "tcp"
@@ -103,16 +110,16 @@ resource "aws_security_group" "final_consul" {
 
 
 # Create the user-data for the Consul server
-data "template_file" "consul_server" {
+data "template_file" "consul_server_settings" {
   count    = var.consul_servers
-  template = file("${path.module}/consul/templates/consul.sh.tpl")
+  template = file("${path.module}/consul/consul-server.sh.tpl")
 
   vars = {
     consul_version = var.consul_version
     node_exporter_version = var.node_exporter_version
     prometheus_dir = var.prometheus_dir
     config = <<EOF
-      "node_name": "consul-server-${count.index +1}",
+      "node_name": "consul-server",
       "server": true,
       "bootstrap_expect": 3,
       "ui": true,
@@ -124,19 +131,21 @@ data "template_file" "consul_server" {
   }
 }
 
+
+
 # Create the Consul cluster
 resource "aws_instance" "consul_server" {
   count                  = var.consul_servers
-  availability_zone      = "${data.aws_availability_zones.available.names[count.index]}"
+  availability_zone      = data.aws_availability_zones.available.names[count.index]
   subnet_id = module.vpc.public_subnets[count.index]
   ami                    = "ami-024582e76075564db"
   instance_type          = "t2.micro"
   key_name = aws_key_pair.servers_key.key_name
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
-  vpc_security_group_ids = ["${aws_security_group.final_consul.id}"]
+  vpc_security_group_ids = ["${aws_security_group.final_consul.id}", "${aws_security_group.final_monitoring.id}"]
   tags = {
     Name  = "consul-server-${count.index + 1}"
     consul_server = "true"
   }
-  user_data = element(data.template_file.consul_server.*.rendered, count.index)
+  user_data = element(data.template_file.consul_server_settings.*.rendered, count.index)
 }
