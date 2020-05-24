@@ -1,0 +1,17 @@
+filebeat:
+  prospectors:
+ - input_type: log
+   paths:
+     - /var/log/syslog 
+      paths:
+        - /var/log/syslog
+        - /var/log/auth.log
+      document_type: syslog
+
+
+output:
+  logstash:
+    enabled: true
+    hosts:
+      - 127.0.0.1:5043
+    timeout: 15

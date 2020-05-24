@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-### set consul version
-CONSUL_VERSION="1.4.0"
-
 echo "Grabbing IPs..."
 PRIVATE_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
 
 echo "Installing dependencies..."
-apt-get -qq update &>/dev/null
-apt-get -yqq install unzip dnsmasq &>/dev/null
+apt-get -q update
+apt-get -yq install unzip dnsmasq
 
 echo "Configuring dnsmasq..."
 cat << EODMCF >/etc/dnsmasq.d/10-consul
@@ -19,9 +16,17 @@ EODMCF
 
 systemctl restart dnsmasq
 
+cat << EOF >/etc/systemd/resolved.conf
+[Resolve]
+DNS=127.0.0.1
+Domains=~consul
+EOF
+
+systemctl restart systemd-resolved.service
+
 echo "Fetching Consul..."
 cd /tmp
-curl -sLo consul.zip https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip
+curl -sLo consul.zip https://releases.hashicorp.com/consul/1.4.0/consul_1.4.0_linux_amd64.zip
 
 echo "Installing Consul..."
 unzip consul.zip >/dev/null
@@ -34,23 +39,22 @@ mkdir -p /etc/consul.d
 mkdir -p /run/consul
 tee /etc/consul.d/config.json > /dev/null <<EOF
 {
-"advertise_addr": "$PRIVATE_IP",
+  "advertise_addr": "$PRIVATE_IP",
   "data_dir": "/opt/consul",
   "datacenter": "opsschool-final-project",
   "encrypt": "uDBV4e+LbFW3019YKPxIrg==",
   "log_level": "INFO",
-  "enable_syslog": true,
-  "enable_debug": true,
   "ui": true,
   "client_addr": "0.0.0.0",
   "disable_remote_exec": true,
   "disable_update_check": true,
   "leave_on_terminate": true,
   "retry_join": ["provider=aws tag_key=consul_server tag_value=true"],
-  ${config}
+   ${config}
 }
-
 EOF
+
+
 
 # Create user & grant ownership of folders
 useradd consul
@@ -71,7 +75,7 @@ PIDFile=/run/consul/consul.pid
 Restart=on-failure
 Environment=GOMAXPROCS=2
 ExecStart=/usr/local/bin/consul agent -pid-file=/run/consul/consul.pid -config-dir=/etc/consul.d
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecReload=/bin/kill -s HUP \$MAINPID
 KillSignal=SIGINT
 TimeoutStopSec=5
 
@@ -79,21 +83,10 @@ TimeoutStopSec=5
 WantedBy=multi-user.target
 EOF
 
-
-
 systemctl daemon-reload
 systemctl enable consul.service
 systemctl start consul.service
 
 
-# Create consul node_exporter configuration
-tee /opt/prometheus/prometheus.yml > /dev/null <<EOF
-scrape_configs:
-  - job_name: 'node_exporter'
-    static_configs:
-    - targets: ['localhost:9100']
-EOF
 
-systemctl daemon-reload
-systemctl enable promcol.service
-systemctl start promcol.service
+

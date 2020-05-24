@@ -7,20 +7,20 @@ variable "aws_region" {
 }
 
 variable "my_ip"{
-  default = "79.180.99.239/32"
+  default = "77.138.249.64/32"
   description = "my ip address"
 }
 
 ############ VPC ######################
-variable "vpc_id" {
-  description = "ID of the VPC where to create security group"
-  type        = string
-  default = ""
-}
+# variable "vpc_id" {
+#   description = "ID of the VPC where to create security group"
+#   type        = string
+#   default = ""
+# }
 variable "vpc_name" {
   description = "Name of VPC"
   type        = string
-  default     = ""
+  default     = "final-project"
 }
 
 variable "vpc_cidr" {

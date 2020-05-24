@@ -23,52 +23,52 @@ resource "aws_security_group" "jenkins-final" {
     from_port = 80
     to_port = 80
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
   
   ingress {
     from_port = 443
     to_port = 443
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
     description = "Allow Jenkins inbound traffic"
   }
   ingress {
     from_port = 8080
     to_port = 8080
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
   ingress {
     from_port = 5000
     to_port = 5000
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
   ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
   ingress {
     from_port = 2375
     to_port = 2375
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
   ingress {
     from_port   = 8500
     to_port     = 8500
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
     description = "Allow consul UI access from the world"
   }
   egress {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    cidr_blocks     = [var.my_ip]
     description     = "Allow all outside security group"
   }
   tags = {
@@ -82,7 +82,7 @@ data "template_file" "jenkins_master_sh" {
 }
 
 data "template_file" "consul_jenkins" {
-  template = file("${path.module}/templates/consul-agent.sh.tpl")
+  template = file("${path.module}/templates/consul.sh.tpl")
 
   vars = {
       node_exporter_version = var.node_exporter_version
@@ -95,25 +95,19 @@ data "template_file" "consul_jenkins" {
   }
 }
 
-data "template_file" "node_exporter_agent" {
-  template = file("${path.module}/templates/node_exporter.sh.tpl")
-}
 
 # Create the user-data for the jenkins master
-data "template_cloudinit_config" "consul_jenkins_settings" {
+data "template_cloudinit_config" "jenkins_master_settings" {
   part {
     content = data.template_file.consul_jenkins.rendered
   }
   part {
-    content = data.template_file.node_exporter_agent.rendered
-  }
-  part {
     content = data.template_file.jenkins_master_sh.rendered
   }
+  part {
+  content = data.template_file.node_exporter.rendered
+  }
 }
-
-
-
 
 
 resource "aws_instance" "jenkins_master" {
@@ -145,7 +139,7 @@ resource "aws_instance" "jenkins_master" {
     source = "jenkins/plugins.txt"
     destination = "/home/ubuntu/plugins.txt" 
   }
-  user_data = data.template_cloudinit_config.consul_jenkins_settings.rendered
+  user_data = data.template_cloudinit_config.jenkins_master_settings.rendered
 }
 
 
@@ -156,7 +150,7 @@ resource "aws_instance" "jenkins_master" {
 
 
 data "template_file" "consul_jenkins_slave" {
-  template = file("${path.module}/templates/consul-agent-linux.sh.tpl")
+  template = file("${path.module}/templates/consul.sh.tpl")
 
   vars = {
     node_exporter_version = var.node_exporter_version
@@ -175,12 +169,14 @@ data "template_file" "jenkins_slave_sh" {
 #Create the user-data for the jenkins slave
 data "template_cloudinit_config" "consul_jenkins_slave_settings" {
   count =  1
-  
   part {
     content = element(data.template_file.consul_jenkins_slave.*.rendered, count.index)
   }
   part {
     content = element(data.template_file.jenkins_slave_sh.*.rendered, count.index)
+  }
+  part {
+    content = element(data.template_file.node_exporter.*.rendered, count.index)
   }
 }
 

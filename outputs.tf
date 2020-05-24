@@ -34,3 +34,13 @@ output "consul_servers" {
 #   value       = "http://${aws_eip.ip.public_ip}:5601"
 #   description = "URL to your ELK server's Kibana web page"
 # }
+
+output "kubeconfig" {
+  value       = module.eks.kubeconfig
+  description = "EKS Kubeconfig"
+}
+
+output "config-map" {
+  value       = module.eks.config-map-aws-auth
+  description = "K8S config map to authorize"
+}
