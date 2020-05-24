@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: final-phone-book
+spec:
+  selector:
+    app: final-phone-book
+  ports:
+  - protocol: "TCP"
+    port: 8181
+    targetPort: 8181
+  type: LoadBalancer

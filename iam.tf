@@ -45,7 +45,7 @@ resource "aws_iam_policy" "final-jenkins_eks" {
 # Attach the policy
 resource "aws_iam_policy_attachment" "final-jenkins_eks" {
   name       = "final-jenkins_eks"
-  roles      = ["${aws_iam_role.final-jenkins_eks.name}"]
+  roles      = ["${aws_iam_role.final-jenkins_eks.name}", ]
   policy_arn = aws_iam_policy.final-jenkins_eks.arn
 }
 

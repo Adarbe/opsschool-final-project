@@ -115,15 +115,18 @@ data "template_file" "consul_server_tpl" {
   template = file("${path.module}/templates/consul.sh.tpl")
 
   vars = {
+    consul_version = var.consul_version
+    node_exporter_version = var.node_exporter_version
+    prometheus_dir = var.prometheus_dir
     config = <<EOF
-  "node_name": "consul-server",
-  "server": true,
-  "bootstrap_expect": 3,
-  "ui": true,
-  "client_addr": "0.0.0.0",
-  "telemetry": {
-    "prometheus_retention_time": "10m"
-  }
+      "node_name": "consul-server-${count.index +1}",
+      "server": true,
+      "bootstrap_expect": 3,
+      "ui": true,
+      "client_addr": "0.0.0.0",
+      "telemetry": {
+        "prometheus_retention_time": "10m"
+      }
   EOF
   }
 }
@@ -133,9 +136,9 @@ data "template_file" "consul_node_exporter" {
   template = file("${path.module}/templates/consul_node_exporter.sh.tpl")
 }
 
-#Create the user-data for the jenkins slave
+#Create the user-data for the consul server
 data "template_cloudinit_config" "consul_server_settings" {
-  count =  1
+  count    = var.consul_servers
   part {
     content = element(data.template_file.consul_server_tpl.*.rendered, count.index)
   }

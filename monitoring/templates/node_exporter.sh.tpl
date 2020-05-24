@@ -25,6 +25,35 @@ TimeoutStopSec=5
 WantedBy=multi-user.target
 EOF
 
+sudo tee /etc/systemd/system/node_exporter.service &>/dev/null << EOF
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter --collector.textfile.directory /var/lib/node_exporter/textfile_collector \
+ --no-collector.infiniband
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+tee /var/lib/node_exporter/textfile_collector/metrics.prom > /dev/null <<"EOF"
+node_exporter_build_info
+node_memory_MemFree_bytes
+node_cpu_seconds_total
+node_filesystem_avail_bytes
+rate(node_cpu_seconds_total{mode="system"}[1m]) 
+rate(node_network_receive_bytes_total[1m])
+node_disk_io_time_seconds_total
+node_network_info
+
+EOF
+
 systemctl daemon-reload
 systemctl enable node_exporter.service
 systemctl start node_exporter.service

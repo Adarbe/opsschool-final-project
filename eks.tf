@@ -46,23 +46,26 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
-
     cidr_blocks = [
      "10.0.0.0/16",
-     "77.138.249.64/32",
-     "199.203.102.38/32",
-     "207.232.13.77/32",
-     "192.168.1.0/32"
+     "79.177.130.103/32",
     ]
   }
-#   ingress { (consul)
-#     from_port = 8500
-#     to_port   = 8500
-#     protocol  = "tcp"
-#     security_groups
-#     cidr_blocks = 
-#   }
-#    egress 0--0
+  ingress { 
+    from_port = 8500
+    to_port   = 8500
+    protocol  = "tcp"
+    cidr_blocks = [
+     "10.0.0.0/16",
+     "79.177.130.103/32"
+    ]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 module "eks" {
