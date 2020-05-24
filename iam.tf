@@ -28,29 +28,29 @@ resource "aws_iam_instance_profile" "consul-join" {
 
 
 
-# ######### IAM Jenkins####################
-# ## Jenkins IAM Resources ##
-# resource "aws_iam_role" "final-jenkins_eks" {
-#   name = "final-jenkins_eks"
-#   assume_role_policy = file("${path.module}/eks/templates/policies/eks_jenkins_iam_role.json")
-# }
+######### IAM Jenkins####################
+## Jenkins IAM Resources ##
+resource "aws_iam_role" "final-jenkins_eks" {
+  name = "final-jenkins_eks"
+  assume_role_policy = file("${path.module}/policies/eks_jenkins_iam_role.json")
+}
 
-# # Create the policy
-# resource "aws_iam_policy" "final-jenkins_eks" {
-#   name = "final-jenkins_eks"
-#   policy = file("${path.module}/eks/templates/policies/eks_jenkins_iam_policy.json")
-# }
+# Create the policy
+resource "aws_iam_policy" "final-jenkins_eks" {
+  name = "final-jenkins_eks"
+  policy = file("${path.module}/policies/eks_jenkins_iam_policy.json")
+}
 
 
-# # Attach the policy
-# resource "aws_iam_policy_attachment" "final-jenkins_eks" {
-#   name       = "final-jenkins_eks"
-#   roles      = ["${aws_iam_role.final-jenkins_eks.name}"]
-#   policy_arn = aws_iam_policy.final-jenkins_eks.arn
-# }
+# Attach the policy
+resource "aws_iam_policy_attachment" "final-jenkins_eks" {
+  name       = "final-jenkins_eks"
+  roles      = ["${aws_iam_role.final-jenkins_eks.name}"]
+  policy_arn = aws_iam_policy.final-jenkins_eks.arn
+}
 
-# # Create the instance profile
-# resource "aws_iam_instance_profile" "final-jenkins_eks" {
-#   name  = "final-jenkins_eks"
-#   role = aws_iam_role.final-jenkins_eks.name
-# }
+# Create the instance profile
+resource "aws_iam_instance_profile" "final-jenkins_eks" {
+  name  = "final-jenkins_eks"
+  role = aws_iam_role.final-jenkins_eks.name
+}

@@ -22,7 +22,7 @@ def app = ''
       }  
   }
     stage("deploy app") {
-                sh "aws eks --region us-east-1 update-kubeconfig --name final-project-eks"
+                sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-final-project"
                 sh "chmod +x ./*"
                 sh "chmod +x ./*/*"
                 sh "chmod +x ./*/*/*"
