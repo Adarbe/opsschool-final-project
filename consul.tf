@@ -17,6 +17,13 @@ resource "aws_security_group" "final_consul" {
     cidr_blocks = [var.my_ip]
     description = "Allow ssh from the world"
   }
+    ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow https from the world"
+  }
   ingress {
     from_port   = 80
     to_port     = 80

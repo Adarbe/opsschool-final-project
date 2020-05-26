@@ -122,7 +122,7 @@ resource "aws_instance" "jenkins_master" {
     Labels = "linux"
   }
   vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}", "${aws_security_group.final_monitoring.id}"]
-  iam_instance_profile   = aws_iam_instance_profile.final-jenkins_eks.name
+  iam_instance_profile   = aws_iam_instance_profile.opsschool-deploy-app.name
   subnet_id = module.vpc.public_subnets[1]
   connection {
     type = "ssh"
@@ -190,7 +190,7 @@ resource "aws_instance" "jenkins_slave" {
   key_name = aws_key_pair.servers_key.key_name
   associate_public_ip_address = true
   subnet_id = module.vpc.public_subnets[2]
-  iam_instance_profile   = aws_iam_instance_profile.final-jenkins_eks.name
+  iam_instance_profile   = aws_iam_instance_profile.opsschool-deploy-app.name
   vpc_security_group_ids =["${aws_security_group.jenkins-final.id}","${aws_security_group.final_consul.id}","${aws_security_group.final_monitoring.id}"]
   tags = {
     Name = "jenkins_slave-${count.index+1}"
