@@ -150,7 +150,7 @@ resource "aws_instance" "jenkins_master" {
 
 
 data "template_file" "consul_jenkins_slave" {
-  template = file("${path.module}/templates/consul.sh.tpl")
+  template = file("${path.module}/templates/consul-agent-linux.sh.tpl")
 
   vars = {
     node_exporter_version = var.node_exporter_version

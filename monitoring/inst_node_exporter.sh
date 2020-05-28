@@ -2,11 +2,11 @@
 set -e
 
 wget \
-  https://github.com/prometheus/node_exporter/releases/download/v${node_exporter_version}/node_exporter-${node_exporter_version}.linux-amd64.tar.gz 
-  -O /tmp/node_exporter-${node_exporter_version}.linux-amd64.tar.gz
+  https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz \
+  -O /tmp/node_exporter-0.18.1.linux-amd64.tar.gz
 
-tar zxvf /tmp/node_exporter-${node_exporter_version}.linux-amd64.tar.gz
-sudo cp ./node_exporter-${node_exporter_version}.linux-amd64/node_exporter /opt/local/bin
+tar zxvf /tmp/node_exporter-0.18.1.linux-amd64.tar.gz
+sudo cp ./node_exporter-0.18.1.linux-amd64/node_exporter /opt/local/bin
 
 
 sudo useradd --no-create-home --shell /bin/false node_exporter

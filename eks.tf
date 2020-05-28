@@ -23,6 +23,7 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_id
 }
 
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
@@ -48,7 +49,7 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     protocol  = "tcp"
     cidr_blocks = [
      "10.0.0.0/16",
-     "79.177.130.103/32",
+     "109.67.40.18/32",
     ]
   }
   ingress { 
@@ -57,7 +58,7 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     protocol  = "tcp"
     cidr_blocks = [
      "10.0.0.0/16",
-     "79.177.130.103/32"
+     "109.67.40.18/32"
     ]
   }
   egress {
