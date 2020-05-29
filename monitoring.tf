@@ -151,10 +151,10 @@ data "template_cloudinit_config" "monitoring_settings" {
     content = data.template_file.monitoring_sh_tpl.rendered
   }
   part {
-    content = data.template_file.node_exporter.rendered
+    content = data.template_file.monitoring_sh.rendered
   }
   part {
-    content = data.template_file.monitoring_sh.rendered
+    content = data.template_file.node_exporter.rendered
   }
 }
 
