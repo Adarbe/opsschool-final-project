@@ -162,3 +162,10 @@ sse-gateway
 terraform
 mercurial: 2.8
 workflow-scm-step
+
+greenballs
+pipeline-cps-http
+groovy-label-assignment
+pipeline-aws
+aws-codepipeline
+pipeline-maven
