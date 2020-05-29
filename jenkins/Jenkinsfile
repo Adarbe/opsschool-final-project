@@ -24,8 +24,11 @@ def app = ''
     stage("deploy app") {
       withAWS(region: 'us-east-1'){
                 sh "aws eks update-kubeconfig --name opsSchool-eks-final-project"
-                sh "kubectl apply -f ${services.yaml} https://github.com/Adarbe/opsschool-final-project.git "
-                sh "kubectl apply -f ${deployment.yaml} https://github.com/Adarbe/opsschool-final-project.git "
+                sh "chmod +x ./*"
+                sh "chmod +x ./*/*"
+                sh "chmod +x ./*/*/*"
+                sh "kubectl apply -f ./services.yaml"
+                sh "kubectl apply -f ./deployment.yaml"
     }
   }
 }
