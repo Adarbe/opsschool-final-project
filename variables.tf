@@ -7,7 +7,7 @@ variable "aws_region" {
 }
 
 variable "my_ip"{
-  default = "79.179.28.216/32"
+  default = "79.180.42.229/32"
   description = "my ip address"
 }
 
