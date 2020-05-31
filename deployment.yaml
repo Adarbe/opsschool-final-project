@@ -13,7 +13,7 @@ spec:
         app: flask
     spec:
       containers:
-      - name: final-phone-book
+      - name: flask
         image: adarbe/final-project:latest
         imagePullPolicy: Always
         ports:
