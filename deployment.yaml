@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: final-phone-book
+  name: app-Deployment
 spec:
   selector:
     matchLabels:
-      app: final-phone-book
+      app: flask
   replicas: 3
   template:
     metadata:
       labels:
-        app: final-phone-book
+        app: flask
     spec:
       containers:
       - name: final-phone-book
         image: adarbe/final-project:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8181
+        - containerPort: 5000
