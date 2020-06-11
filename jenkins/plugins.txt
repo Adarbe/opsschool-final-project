@@ -49,6 +49,7 @@ jira
 
 pubsub-light
 
+pipeline-aws
 pipeline-github
 pipeline-model-definition
 pipeline-milestone-step

@@ -175,9 +175,6 @@ data "template_cloudinit_config" "consul_jenkins_slave_settings" {
   part {
     content = element(data.template_file.jenkins_slave_sh.*.rendered, count.index)
   }
-  part {
-    content = element(data.template_file.node_exporter.*.rendered, count.index)
-  }
 }
 
 resource "aws_instance" "jenkins_slave" {

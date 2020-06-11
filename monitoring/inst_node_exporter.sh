@@ -37,22 +37,20 @@ sudo systemctl start node_exporter
 systemctl status --no-pager node_exporter
 sudo systemctl enable node_exporter
 
-tee /var/lib/node_exporter/textfile_collector/metrics.prom > /dev/null <<EOF
-node_exporter_build_info
-node_memory_MemFree_bytes
-node_cpu_seconds_total
-node_filesystem_avail_bytes
-rate(node_cpu_seconds_total{mode="system"}[1m]) 
-rate(node_network_receive_bytes_total[1m])
-node_disk_io_time_seconds_total
-node_network_info
-
-
-EOF
+# tee /var/lib/node_exporter/textfile_collector/metrics.prom > /dev/null <<EOF
+# node_exporter_build_info
+# node_memory_MemFree_bytes
+# node_cpu_seconds_total
+# node_filesystem_avail_bytes
+# rate(node_cpu_seconds_total{mode="system"}[1m]) 
+# rate(node_network_receive_bytes_total[1m])
+# node_disk_io_time_seconds_total
+# node_network_inf
+# EOF
 
 
 
-systemctl daemon-reload
-systemctl start node_exporter
-systemctl status --no-pager node_exporter
-systemctl enable node_exporter
+# systemctl daemon-reload
+# systemctl start node_exporter
+# systemctl status --no-pager node_exporter
+# systemctl enable node_exporter

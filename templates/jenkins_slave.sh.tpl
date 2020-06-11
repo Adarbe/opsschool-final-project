@@ -26,6 +26,12 @@ chmod 600 /home/ec2-user/.ssh/id_rsa
 chmod 600 /home/ec2-user/.ssh/id_rsa.pub
 cat /home/ec2-user/.ssh/id_rsa.pub >> /home/ec2-user/.ssh/authorized_keys
 
+sudo curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+sudo chmod +x ./kubectl
+sudo sudo mv ./kubectl /usr/local/bin/kubectl
+
+
+
 
 
 ### add jenkins service to consul
@@ -34,8 +40,7 @@ tee /etc/consul.d/jenkins-slave.json > /dev/null <<"EOF"
  "service": {
     "name": "jenkins-slave",
     "port": 22,
-    "check": 
-      {
+    "check": {
         "id": "ssh",
         "name": "SSH on port 22",
         "tcp": "localhost:22",
@@ -43,9 +48,7 @@ tee /etc/consul.d/jenkins-slave.json > /dev/null <<"EOF"
         "timeout": "1s"
       }
     }
-  }
 }
-
 EOF 
 
 /usr/local/bin/consul reload
@@ -58,20 +61,8 @@ tee /etc/consul.d/node-exporter.json > /dev/null <<"EOF"
    "tags": ["node_exporter", "prometheus"],
    "port": 9100
   }
+ }
 }
-EOF
-
-consul reload
-
-
-tee /etc/consul.d/node-exporter.json > /dev/null <<"EOF"
-{
-  "service": {
-    "name": "node-exporter-jenkins-slave",
-    "tags": ["node_exporter","prometheus"],
-    "port": 9100
-}
-
 EOF
 
 
@@ -82,25 +73,3 @@ systemctl enable node_exporter
 
 
 
-### add jenkins service to consul
-tee /etc/consul.d/jenkins-master.json > /dev/null <<"EOF"
-{
- "service": {
-    "name": "jenkins-slave",
-    "port": 22,
-    "check": {
-      {
-        "id": "tcp",
-        "name": "TCP on port 22",
-        "http": "localhost:22",
-        "interval": "10s",
-        "timeout": "1s"
-      }
-    }
-  }
-}
-EOF
-
-systemctl daemon-reload
-systemctl enable consul.service
-systemctl start consul.service
