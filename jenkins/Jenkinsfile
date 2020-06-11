@@ -9,9 +9,7 @@ def app = ''
     }
        
     stage('Docker build ') {
-     script {
       app = docker.build ("adarbe/final-project:${BUILD_NUMBER}", "-f ${dockerfile} https://github.com/Adarbe/finalapp.git")  
-      }
     }
     
     stage('deployment'){
